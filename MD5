@@ -1,0 +1,14 @@
+df3d45049c3aebb72857cb78dd942046 *DESCRIPTION
+0e4c901a745562efda463ec97145b486 *NAMESPACE
+fde3a21245f2c03e6038ecc752472859 *R/falcon.r
+1cc0f77efb7c931fd7b8df50167a3bfe *R/falcon_sub.r
+ab88323a26f6d61432a4786c4b8eb416 *R/script_basic.r
+0855d2cf05107e0dea5080e5de51945d *data/Example.rda
+b4541eaf3069cca03bc6b5b83c55409f *man/ReadCounts.Rd
+5c70e2b8da0e100ad6d8598209f7bfce *man/falcon.Rd
+9ca4ff4b25855293aa3e1fe1fb8214d4 *man/getASCN.Rd
+42e331121c11909cd4de3a9a802046df *man/getChangepoints.Rd
+db4921692015e17aa427baeda3e855f4 *man/pos.Rd
+89c55290d5020ac8b51cf0c57d988129 *man/tauhat.Rd
+bc93952f3d23203b3dd16bd18c3d6dd3 *man/view.Rd
+6c5378f868ebbfa02c9b30e9ee19b84d *src/falcon.c
