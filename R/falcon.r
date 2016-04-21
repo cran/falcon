@@ -1,6 +1,9 @@
-getChangepoints = function(AT, BT, AN, BN, verbose=TRUE, pOri=c(0.49,0.51), error=1e-5, maxIter=1000){
-  cat("Number of loci:", length(AT), "\n")
-#  cat("Estimating break-points... \n")
+getChangepoints = function(readMatrix, verbose=TRUE, pOri=c(0.49,0.51), error=1e-5, maxIter=1000){
+  cat("Number of loci:", dim(readMatrix)[1], "\n")
+  AN = readMatrix$AN
+  BN = readMatrix$BN
+  AT = readMatrix$AT
+  BT = readMatrix$BT
   L = 1000
   d = 200
   N = length(AT)
@@ -39,9 +42,13 @@ getChangepoints = function(AT, BT, AN, BN, verbose=TRUE, pOri=c(0.49,0.51), erro
   return(tauhat)
 }
 
-getASCN = function(AT, BT, AN, BN, rdep=NULL, tauhat=NULL, threshold=0.15, pOri=c(0.49,0.51), error=1e-5, maxIter=1000){
+getASCN = function(readMatrix, rdep=NULL, tauhat=NULL, threshold=0.15, pOri=c(0.49,0.51), error=1e-5, maxIter=1000){
+  AN = readMatrix$AN
+  BN = readMatrix$BN
+  AT = readMatrix$AT
+  BT = readMatrix$BT
   if (is.null(rdep)) rdep = median(AT+BT)/median(AN+BN)
-  if (is.null(tauhat)) tauhat = getChangepoints(AT, BT, AN, BN, pOri=pOri, error=error, maxIter=maxIter)
+  if (is.null(tauhat)) tauhat = getChangepoints(readMatrix, pOri=pOri, error=error, maxIter=maxIter)
   N = length(AT)
   tau = sort(unique(c(1,tauhat,N)))
   K = length(tau)-1
@@ -57,7 +64,11 @@ getASCN = function(AT, BT, AN, BN, rdep=NULL, tauhat=NULL, threshold=0.15, pOri=
       temp = as.numeric(.Call("LikH", as.numeric(AT[ids]), as.numeric(BT[ids]), as.numeric(AN[ids]), as.numeric(BN[ids]), as.numeric(p), PACKAGE="falcon"))
       p2 = sum(AT[ids]+BT[ids])/sum(AT[ids]+BT[ids]+AN[ids]+BN[ids])
       temp2 = as.numeric(.Call("Lik", as.numeric(AT[ids]), as.numeric(BT[ids]), as.numeric(AN[ids]), as.numeric(BN[ids]), as.numeric(rep(p2,2)), PACKAGE="falcon"))
-      bic = temp[1] - temp2 - temp[2]/2 + log(p2*(1-p2)*sum(AT[ids]+BT[ids]+AN[ids]+BN[ids]))/2 + log(2*pi)/2
+      if (!is.na(temp)[1] && !is.na(temp[2]) && !is.na(temp2)){
+        bic = temp[1] - temp2 - temp[2]/2 + log(p2*(1-p2)*sum(AT[ids]+BT[ids]+AN[ids]+BN[ids]))/2 + log(2*pi)/2
+      } else if (!is.na(temp)[1] && !is.na(temp2)){
+        bic = temp[1] - temp2 + log(p2*(1-p2)*sum(AT[ids]+BT[ids]+AN[ids]+BN[ids]))/2 + log(2*pi)/2
+      }
       if (bic<0){
         pa[i] = p2
         pb[i] = p2
@@ -79,6 +90,50 @@ getASCN = function(AT, BT, AN, BN, rdep=NULL, tauhat=NULL, threshold=0.15, pOri=
       Haplotype[[i]] = temp3
     }
   }
-  return(list(tauhat=tauhat, ascn=rbind(cns1,cns2), Haplotype=Haplotype))
+  return(list(tauhat=tauhat, ascn=rbind(cns1,cns2), Haplotype=Haplotype, readMatrix=readMatrix))
 }
+
+
+view = function(output, pos=NULL, rdep=NULL, plot="all", ...){
+  readMatrix = output$readMatrix
+  tauhat = output$tauhat
+  ascn = output$ascn
+  AN = readMatrix$AN
+  BN = readMatrix$BN
+  AT = readMatrix$AT
+  BT = readMatrix$BT
+  
+  N = length(AT)
+  tau = sort(unique(c(1,tauhat,N)))
+  ascn1 = ascn[1,]
+  ascn2 = ascn[2,]
+  if (is.null(pos)){
+    pos = 1:N
+    myxlab = "SNP #"
+  }else{
+    myxlab = "Position (bp)"
+  }
+  if (is.null(rdep)) rdep = median(AT+BT)/median(AN+BN)
+  
+  if (plot=="all"){
+    par(mfrow=c(3,1))
+  }
+  if (plot=="all" || plot=="Afreq"){
+    plot(pos, AN/(AN+BN), xlab=myxlab, ylim=c(0,1),ylab="A freq", col="gray", pch=".",...)
+    points(pos, AT/(AT+BT), pch=".",...)
+    abline(h=0.5, col="green")
+    abline(v=pos[tau], col="purple", lty=2)
+  }
+  if (plot=="all" || plot=="RelativeCoverage"){
+    plot(pos, (AT+BT)/(AN+BN)/rdep, ylab="Relative Coverage", xlab=myxlab, pch=".",...)
+    abline(h=1,col="green")
+    abline(v=pos[tau], col="purple", lty=2)
+  }
+  if (plot=="all" || plot=="ASCN"){
+    plotCN(N, tau, ascn, pos=pos,xlab=myxlab, ...)
+  }
+}
+
+
+
   

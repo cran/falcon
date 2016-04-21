@@ -155,37 +155,4 @@ plotCN = function(n, tauhat, ascn, pos=NULL, gaincol="red", losscol="blue", neut
   }
 }
 
-view = function(AT, BT, AN, BN, tauhat, ascn, pos=NULL, rdep=NULL, plot="all", ...){
-  N = length(AT)
-  tau = sort(unique(c(1,tauhat,N)))
-  ascn1 = ascn[1,]
-  ascn2 = ascn[2,]
-  if (is.null(pos)){
-    pos = 1:N
-    myxlab = "SNP #"
-  }else{
-    myxlab = "Position (bp)"
-  }
-  if (is.null(rdep)) rdep = median(AT+BT)/median(AN+BN)
-
-  if (plot=="all"){
-    par(mfrow=c(3,1))
-  }
-  if (plot=="all" || plot=="Afreq"){
-    plot(pos, AN/(AN+BN), xlab=myxlab, ylim=c(0,1),ylab="A freq", col="gray", pch=".",...)
-    points(pos, AT/(AT+BT), pch=".",...)
-    abline(h=0.5, col="green")
-    abline(v=pos[tau], col="purple", lty=2)
-  }
-  if (plot=="all" || plot=="RelativeCoverage"){
-    plot(pos, (AT+BT)/(AN+BN)/rdep, ylab="Relative Coverage", xlab=myxlab, pch=".",...)
-    abline(h=1,col="green")
-    abline(v=pos[tau], col="purple", lty=2)
-  }
-  if (plot=="all" || plot=="ASCN"){
-    plotCN(N, tau, ascn, pos=pos,xlab=myxlab, ...)
-  }
-}
-
-
 

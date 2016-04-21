@@ -4,14 +4,11 @@
 \description{Given a set of breakpoints where parent-specific copy number changes, this function estimates the parent-specific copy number for each segment, and the haplotype for the major chromosome on segments where the two homologous chromosomes have different copy numbers.  You are recommended to specify the parameter "rdep", the case-control genome-wide average coverage ratio.  Usually, a good estimate of rdep is (total mapped reads in tumor)/(total mapped reads in normal).  
 }
 \usage{
-getASCN(AT, BT, AN, BN, rdep=NULL, tauhat=NULL, threshold=0.15, pOri=c(0.49,0.51), 
+getASCN(readMatrix, rdep=NULL, tauhat=NULL, threshold=0.15, pOri=c(0.49,0.51), 
 error=1e-5, maxIter=1000)
 }
 \arguments{
-  \item{AT}{A vector of A-allele coverage at the variant loci in the case sample.}
-  \item{BT}{A vector of B-allele coverage at the variant loci in the case sample.}
-  \item{AN}{A vector of A-allele coverage at the variant loci in the control sample.}
-  \item{BN}{A vector of B-allele coverage at the variant loci in the control sample.}
+  \item{readMatrix}{A data frame with four columns and the column names are "AN", "BN", "AT" and "BT".  They are A-allele coverage in the tumor (case) sample, B-allele coverage in the tumor (case) sample, A-allele coverage in the normal (control) sample, and B-allele coverage in the normal (control) sample, respectively.}
   \item{rdep}{The case-control coverage ratio, i.e., the ratio of the total number of mapped reads in case sample versus that in the control sample.  If this is not specified (NULL), then the value median(AT+BT)/median(AN+BN) will be used.}
   \item{tauhat}{The estimated break points.  If it is not specified (NULL), then this function will first estimate the break points by calling the function "gettau", and then estimate the parent-specific DNA copy number for each segment.}
   \item{threshold}{The estimated copy number are set to be 1 if it differs from 1 by less than this threshold.}
@@ -27,8 +24,7 @@ error=1e-5, maxIter=1000)
 }
 \examples{
 data(Example) 
-attach(ReadCounts)
-cn = getASCN(AT, BT, AN, BN, tauhat=tauhat)
+cn = getASCN(readMatrix, tauhat=tauhat)
  # cn$tauhat would give the indices of change-points.  
  # cn$ascn would give the estimated allele-specific copy numbers for each segment.
  # cn$Haplotype[[i]] would give the estimated haplotype for the major chromosome in segment i 
